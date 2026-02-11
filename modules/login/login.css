@@ -143,7 +143,7 @@ div#formBlock
     float: right;
     
     /* display: inline; */
-    text-align: left; 
+    text-align: center; 
     width:288px;
     height:266px;
     -webkit-border-radius: 20px;
@@ -154,6 +154,17 @@ div#formBlock
     -webkit-box-shadow: #B3B3B3 6px 6px 6px;
     -moz-box-shadow: #B3B3B3 6px 6px 6px;
     box-shadow: #B3B3B3 6px 6px 6px;
+}
+
+div#formBlock img
+{
+    max-height: 80px;
+    max-width: 250px;
+    height: auto;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin: 10px auto;
 }
     
     

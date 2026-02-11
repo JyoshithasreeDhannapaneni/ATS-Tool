@@ -30,12 +30,7 @@
                                         <label id="nameLabel" for="name">Company Name:</label>
                                     </td>
                                     <td class="tdData">
-                                        <?php if ($this->data['defaultCompany'] != 1): ?>
-                                            <input type="text" name="name" id="name" value="<?php $this->_($this->data['name']); ?>" class="inputbox" style="width: 150px;" />&nbsp;*
-                                        <?php else: ?>
-                                            <?php $this->_($this->data['name']); ?>
-                                            <input type="hidden" name="name" id="name" value="<?php $this->_($this->data['name']); ?>" />
-                                        <?php endif; ?>
+                                        <input type="text" name="name" id="name" value="<?php $this->_($this->data['name']); ?>" class="inputbox" style="width: 150px;" />&nbsp;*
                                     </td>
                                 </tr>
 

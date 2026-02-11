@@ -119,7 +119,7 @@ class HTTPLogger
             $db->makeQueryString($logTypeName)
         );
         
-        $result = $db->getColumn($sql, 0, 0);
+        $result = $db->getColumn(0, 0, $sql);
         if ($result === false)
         {
             return -1;

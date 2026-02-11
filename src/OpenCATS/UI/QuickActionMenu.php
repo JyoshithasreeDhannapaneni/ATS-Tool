@@ -5,6 +5,7 @@ class QuickActionMenu
 {
     private $dataItemType;
     private $dataItemId;
+    private $accessLevel;
 
     public function __construct($dataItemType, $dataItemId, $accessLevel)
     {

@@ -123,7 +123,9 @@
                                 </table>
                             <?php else: ?>
                                 <?php if (PARSING_ENABLED &&
-                                    count($this->parsingStatus) &&
+                                    is_array($this->parsingStatus) &&
+                                    isset($this->parsingStatus['parseUsed']) &&
+                                    isset($this->parsingStatus['parseLimit']) &&
                                     $this->parsingStatus['parseUsed'] >= $this->parsingStatus['parseLimit'] &&
                                     $this->parsingStatus['parseLimit'] >= 0): ?>
                                 <a href="http://www.catsone.com/professional" target="_blank">All daily resume imports used. For more, upgrade to CATS professional</a>.
@@ -193,7 +195,7 @@
                         <td class="tdData">
                             <input type="text" tabindex="6" name="phoneHome" id="phoneHome" class="inputbox" style="width: 150px;" value="<?php if (isset($this->preassignedFields['phoneHome'])) $this->_($this->preassignedFields['phoneHome']); ?>" onchange="checkPhoneAlreadyInSystem(this.value);"  />
                             <?php if ($this->isParsingEnabled): ?>
-                                <?php if ($this->parsingStatus['parseLimit'] >= 0 && $this->parsingStatus['parseUsed'] >= $this->parsingStatus['parseLimit']): ?>
+                                <?php if (is_array($this->parsingStatus) && isset($this->parsingStatus['parseLimit']) && isset($this->parsingStatus['parseUsed']) && $this->parsingStatus['parseLimit'] >= 0 && $this->parsingStatus['parseUsed'] >= $this->parsingStatus['parseLimit']): ?>
                                     &nbsp;
                                 <?php else: ?>
                                     <?php if ($this->isModal): ?>&nbsp;&nbsp;<?php else: ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php endif; ?>

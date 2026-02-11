@@ -39,6 +39,7 @@ include_once(LEGACY_ROOT . '/lib/Width.php');
  *  @package    CATS
  *  @subpackage Library
  */
+#[AllowDynamicProperties]
 class DataGrid
 {
     /* DataGrid gets extended by classes which must be kept in modules/modulename/dataGrids.php.  Each
@@ -1289,14 +1290,18 @@ class DataGrid
 
         if (count($selectSQL) > 0)
         {
-            $selectSQL = '' . implode($selectSQL, ','."\n");
+            $selectSQL = '' . implode(','."\n", $selectSQL);
         }
         else
         {
             $selectSQL = '0 as __nothing';
         }
 
-        $joinSQL = implode($joinSQL, "\n");
+        // Ensure $joinSQL is an array before imploding
+        if (!is_array($joinSQL)) {
+            $joinSQL = array();
+        }
+        $joinSQL = implode("\n", $joinSQL);
         if ($this->_parameters['maxResults'] != -1)
         {
             if ($this->_parameters['rangeStart'] < 0)
@@ -1325,8 +1330,15 @@ class DataGrid
             $limitSQL = '';
         }
 
-        $whereSQL = implode($whereSQL, ' AND '."\n");
-        $havingSQL = implode($havingSQL, ' AND '."\n");
+        // Ensure arrays before imploding
+        if (!is_array($whereSQL)) {
+            $whereSQL = array();
+        }
+        if (!is_array($havingSQL)) {
+            $havingSQL = array();
+        }
+        $whereSQL = implode(' AND '."\n", $whereSQL);
+        $havingSQL = implode(' AND '."\n", $havingSQL);
         $orderSQL = 'ORDER BY ' . $this->_parameters['sortBy'] . ' ' . $this->_parameters['sortDirection'];
 
         $sql = $this->getSQL($selectSQL, $joinSQL, $whereSQL, $havingSQL, $orderSQL, $limitSQL);

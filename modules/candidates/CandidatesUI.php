@@ -585,6 +585,9 @@ class CandidatesUI extends UserInterface
         }
         $pipelines = new Pipelines($this->_siteID);
         $pipelinesRS = $pipelines->getCandidatePipeline($candidateID);
+        
+        // Get all available statuses for dropdown
+        $statusesRS = $pipelines->getStatusesForPicking();
 
         $sessionCookie = $_SESSION['CATS']->getCookie();
 
@@ -722,6 +725,7 @@ class CandidatesUI extends UserInterface
         $this->_template->assign('isShortNotes', $isShortNotes);
         $this->_template->assign('attachmentsRS', $attachmentsRS);
         $this->_template->assign('pipelinesRS', $pipelinesRS);
+        $this->_template->assign('statusesRS', $statusesRS);
         $this->_template->assign('activityRS', $activityRS);
         $this->_template->assign('calendarRS', $calendarRS);
         $this->_template->assign('extraFieldRS', $extraFieldRS);
@@ -862,10 +866,16 @@ class CandidatesUI extends UserInterface
             $isParsingEnabled = false;
         }
 
-        if (is_array($parsingStatus = LicenseUtility::getParsingStatus()) &&
+        $parsingStatus = LicenseUtility::getParsingStatus();
+        if (is_array($parsingStatus) &&
             isset($parsingStatus['parseLimit']))
         {
             $parsingStatus['parseLimit'] = $parsingStatus['parseLimit'] - 1;
+        }
+        else
+        {
+            // Ensure parsingStatus is always an array to prevent array offset warnings
+            $parsingStatus = array();
         }
 
         $this->_template->assign('parsingStatus', $parsingStatus);

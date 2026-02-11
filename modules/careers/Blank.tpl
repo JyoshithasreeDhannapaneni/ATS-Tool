@@ -37,7 +37,7 @@
 
         <?php /* WARNING: It is against the terms of the CPL to remove or alter the following line.  The 'Powered by OpenCATS' line must stay visible on every page. */ ?>
         <div id="poweredCATS">
-		<a href="http://www.opencats.org" target="_blank"><img src="../images/CATS-powered.gif" alt="Powered by: OpenCATS - Applicant Tracking System" title="Powered by: OpenCATS - Applicant Tracking System" /></a>
+		<a href="http://www.opencats.org" target="_blank"><img src="../images/CATS-powered.gif" alt="Powered by: Neutara ATS Tool" title="Powered by: Neutara ATS Tool" /></a>
 		</div>
     </div>
     <script type="text/javascript">st_init();</script>

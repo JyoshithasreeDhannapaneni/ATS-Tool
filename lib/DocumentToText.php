@@ -351,27 +351,87 @@ class DocumentToText
         /* Running on Windows? */
         if (SystemUtility::isWindows())
         {
-            /* Generate a random temp file name. */
-            $tempFile = sprintf(
-                '%s/%s.txt',
-                realpath(CATS_TEMP_DIR),
-                FileUtility::makeRandomFilename()
-            );
+            /* Check if COM extension is available */
+            if (class_exists('COM') && extension_loaded('com_dotnet'))
+            {
+                try {
+                    /* Generate a random temp file name. */
+                    $tempFile = sprintf(
+                        '%s/%s.txt',
+                        realpath(CATS_TEMP_DIR),
+                        FileUtility::makeRandomFilename()
+                    );
 
-            /* Create a new COM Windows Scripting Host Shell object. */
-            $WSHShell = new COM('WScript.Shell');
+                    /* Create a new COM Windows Scripting Host Shell object. */
+                    $WSHShell = new COM('WScript.Shell');
 
-            /* Build the command to execute. */
-            $command = sprintf(
-                'cmd.exe /C "%s > "%s""', $command, $tempFile
-            );
+                    /* Build the command to execute. */
+                    $command = sprintf(
+                        'cmd.exe /C "%s > "%s""', $command, $tempFile
+                    );
 
-            /* Execute the command via the Windows Scripting Host Shell. */
-            $returnCode = $WSHShell->Run($command, 0, true);
+                    /* Execute the command via the Windows Scripting Host Shell. */
+                    $returnCode = $WSHShell->Run($command, 0, true);
 
-            /* Grab the contents of the temporary file and remove it. */
-            $output = file($tempFile);
-            @unlink($tempFile);
+                    /* Grab the contents of the temporary file and remove it. */
+                    $output = file($tempFile);
+                    @unlink($tempFile);
+                }
+                catch (Exception $e)
+                {
+                    /* COM failed, fall back to exec() */
+                    /* For Windows, we need to redirect output properly */
+                    $tempFile = sprintf(
+                        '%s/%s.txt',
+                        realpath(CATS_TEMP_DIR),
+                        FileUtility::makeRandomFilename()
+                    );
+                    
+                    $windowsCommand = sprintf(
+                        'cmd.exe /C "%s > "%s" 2>&1"', $command, $tempFile
+                    );
+                    
+                    @exec($windowsCommand, $dummy, $returnCode);
+                    
+                    /* Read output from temp file if it exists */
+                    if (file_exists($tempFile))
+                    {
+                        $output = file($tempFile);
+                        @unlink($tempFile);
+                    }
+                    else
+                    {
+                        $output = array();
+                    }
+                }
+            }
+            else
+            {
+                /* COM extension not available, use exec() as fallback */
+                /* For Windows, we need to redirect output properly */
+                $tempFile = sprintf(
+                    '%s/%s.txt',
+                    realpath(CATS_TEMP_DIR),
+                    FileUtility::makeRandomFilename()
+                );
+                
+                $windowsCommand = sprintf(
+                    'cmd.exe /C "%s > "%s" 2>&1"', $command, $tempFile
+                );
+                
+                @exec($windowsCommand, $dummy, $returnCode);
+                
+                /* Read output from temp file if it exists */
+                if (file_exists($tempFile))
+                {
+                    $output = file($tempFile);
+                    @unlink($tempFile);
+                }
+                else
+                {
+                    $output = array();
+                }
+            }
         }
         else
         {

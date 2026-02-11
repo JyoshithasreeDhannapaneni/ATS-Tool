@@ -492,7 +492,8 @@ class ImportUI extends UserInterface
         /* Recover from magic quotes. Note that tmp_name doesn't appear to
          * get escaped, and stripslashes() on it breaks on Windows. - Will
          */
-        if (get_magic_quotes_gpc())
+        /* Magic quotes were removed in PHP 5.4.0, function removed in PHP 8.0 */
+        if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc())
         {
             $originalFilename = stripslashes($originalFilename);
             $contentType      = stripslashes($contentType);
@@ -1716,7 +1717,7 @@ class ImportUI extends UserInterface
                             $db->makeQueryString($doc['email']),
                             $this->_siteID
                         );
-                        if ($db->getColumn($sql, 0, 0) > 0)
+                        if ($db->getColumn(0, 0, $sql) > 0)
                         {
                             $isCandidateUnique = false;
                         }
@@ -1737,7 +1738,7 @@ class ImportUI extends UserInterface
                             $db->makeQueryString($doc['phone']),
                             $this->_siteID
                         );
-                        if ($db->getColumn($sql, 0, 0) > 0)
+                        if ($db->getColumn(0, 0, $sql) > 0)
                         {
                             $isCandidateUnique = false;
                         }
@@ -1754,7 +1755,7 @@ class ImportUI extends UserInterface
                             $db->makeQueryString($doc['zipCode']),
                             $this->_siteID
                         );
-                        if ($db->getColumn($sql, 0, 0) > 0)
+                        if ($db->getColumn(0, 0, $sql) > 0)
                         {
                             $isCandidateUnique = false;
                         }

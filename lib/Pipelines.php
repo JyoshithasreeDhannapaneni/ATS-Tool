@@ -541,24 +541,24 @@ class Pipelines
          */
         $sql = sprintf(
             "SELECT
-                IF(attachment_id, 1, 0) AS attachmentPresent,
-                IF(old_candidate_id, 1, 0) AS isDuplicateCandidate,
-                candidate.candidate_id AS candidateID,
-                candidate.first_name AS firstName,
-                candidate.last_name AS lastName,
-                candidate.state As state,
-                candidate.email1 AS candidateEmail,
-                candidate_joborder.status AS jobOrderStatus,
-                candidate.is_hot AS isHotCandidate,
+                MAX(IF(attachment.attachment_id IS NOT NULL, 1, 0)) AS attachmentPresent,
+                MAX(IF(candidate_duplicates.old_candidate_id IS NOT NULL, 1, 0)) AS isDuplicateCandidate,
+                MAX(candidate.candidate_id) AS candidateID,
+                MAX(candidate.first_name) AS firstName,
+                MAX(candidate.last_name) AS lastName,
+                MAX(candidate.state) As state,
+                MAX(candidate.email1) AS candidateEmail,
+                MAX(candidate_joborder.status) AS jobOrderStatus,
+                MAX(candidate.is_hot) AS isHotCandidate,
                 DATE_FORMAT(
-                    candidate_joborder.date_created, '%%m-%%d-%%y'
+                    MAX(candidate_joborder.date_created), '%%m-%%d-%%y'
                 ) AS dateCreated,
-                UNIX_TIMESTAMP(candidate_joborder.date_created) AS dateCreatedInt,
-                candidate_joborder_status.short_description AS status,
-                candidate_joborder.candidate_joborder_id AS candidateJobOrderID,
-                candidate_joborder.rating_value AS ratingValue,
-                owner_user.first_name AS ownerFirstName,
-                owner_user.last_name AS ownerLastName,
+                UNIX_TIMESTAMP(MAX(candidate_joborder.date_created)) AS dateCreatedInt,
+                MAX(candidate_joborder_status.short_description) AS status,
+                MAX(candidate_joborder.candidate_joborder_id) AS candidateJobOrderID,
+                MAX(candidate_joborder.rating_value) AS ratingValue,
+                MAX(owner_user.first_name) AS ownerFirstName,
+                MAX(owner_user.last_name) AS ownerLastName,
                 (
                     SELECT
                         CONCAT(
@@ -605,8 +605,8 @@ class Pipelines
                     AND
                         site_id = %s
                 ) >= 1, 1, 0) AS submitted,
-                added_user.first_name AS addedByFirstName,
-                added_user.last_name AS addedByLastName
+                MAX(added_user.first_name) AS addedByFirstName,
+                MAX(added_user.last_name) AS addedByLastName
             FROM
                 candidate_joborder
             LEFT JOIN candidate

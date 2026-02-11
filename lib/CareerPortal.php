@@ -407,13 +407,13 @@ class CareerPortalSettings
             "DELETE FROM
                 settings
             WHERE
-                settings.setting = '%s'
+                settings.setting = %s
             AND
                 settings.settings_type = %s
             AND
                 settings.site_id = %s",
-            SETTINGS_CAREER_PORTAL,
             $this->_db->makeQueryString($setting),
+            SETTINGS_CAREER_PORTAL,
             $this->_siteID
         );
         $this->_db->query($sql);

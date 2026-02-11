@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
     <head>
-        <title>opencats - Login</title>
+        <title>Neutara ATS Tool - Login</title>
         <meta http-equiv="Content-Type" content="text/html; charset=<?php echo(HTML_ENCODING); ?>" />
         <style type="text/css" media="all">@import "modules/login/login.css";</style>
         <script type="text/javascript" src="js/lib.js"></script>
@@ -40,7 +40,7 @@
                 </div>
 
                 <div id="formBlock">
-                    <img src="images/CATS-sig.gif" alt="Login" hspace="10" vspace="10" />
+                    <img src="images/Neutaralogo.jpg" alt="Neutara ATS Tool" style="max-height: 80px; max-width: 250px; height: auto; width: auto; display: block; margin: 10px auto;" />
                     <br />
                     <form name="loginForm" id="loginForm" action="<?php echo(CATSUtility::getIndexName()); ?>?m=login&amp;a=attemptLogin<?php if ($this->reloginVars != ''): ?>&amp;reloginVars=<?php echo($this->reloginVars); ?><?php endif; ?>" method="post" onsubmit="return checkLoginForm(document.loginForm);" autocomplete="off">
                         <div id="subFormBlock">
@@ -108,7 +108,7 @@
 <p>
 	&nbsp;</p>  
 
-	<span style="font-size: 12px;"><a href="http://forums.opencats.org ">opencats support forum</a></span>
+	<span style="font-size: 12px;"><a href="http://forums.opencats.org ">Neutara ATS Tool support forum</a></span>
 	           <div id="login">
                 <?php if (!empty($this->message)): ?>
                     <div>
@@ -122,7 +122,7 @@
 	</div>
 	  <div id="footerBlock">
                 <span class="footerCopyright"><?php echo(COPYRIGHT_HTML); ?></span>
-                Based upon original work and Powered by <a href="http://www.opencats.org" target="_blank">OpenCATS</a>.</div>
+                Based upon original work and Powered by <a href="http://www.opencats.org" target="_blank">Neutara ATS Tool</a>.</div>
             </div>
         </div>
 

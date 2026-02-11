@@ -156,8 +156,13 @@ class MRU
             );
         }
 
+        // Ensure $HTML is an array before imploding
+        if (!is_array($HTML)) {
+            $HTML = array();
+        }
+        
         return implode(
-            $HTML, '&nbsp;<span style="color: orange;">|</span>&nbsp;'
+            '&nbsp;<span style="color: orange;">|</span>&nbsp;', $HTML
         );
     }
 

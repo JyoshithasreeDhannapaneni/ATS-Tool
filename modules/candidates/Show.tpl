@@ -516,7 +516,21 @@ use OpenCATS\UI\CandidateDuplicateQuickActionMenu;
                         <td valign="top"><?php $this->_($pipelinesData['ownerAbbrName']) ?></td>
                         <td valign="top"><?php $this->_($pipelinesData['dateCreated']) ?></td>
                         <td valign="top"><?php $this->_($pipelinesData['addedByAbbrName']) ?></td>
-                        <td valign="top" nowrap="nowrap"><?php $this->_($pipelinesData['status']) ?></td>
+                        <td valign="top" nowrap="nowrap">
+                            <?php if ($this->getUserAccessLevel('pipelines.addActivityChangeStatus') >= ACCESS_LEVEL_EDIT): ?>
+                                <select id="statusSelect<?php echo($pipelinesData['candidateJobOrderID']); ?>" 
+                                        onchange="updatePipelineStatus(<?php echo($pipelinesData['candidateJobOrderID']); ?>, <?php echo($this->candidateID); ?>, <?php echo($pipelinesData['jobOrderID']); ?>, this.value, '<?php echo($this->sessionCookie); ?>');"
+                                        style="font-size: 11px; padding: 2px;">
+                                    <?php foreach ($this->statusesRS as $status): ?>
+                                        <option value="<?php echo($status['statusID']); ?>" <?php if ($status['statusID'] == $pipelinesData['statusID']): ?>selected="selected"<?php endif; ?>>
+                                            <?php $this->_($status['status']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php else: ?>
+                                <?php $this->_($pipelinesData['status']); ?>
+                            <?php endif; ?>
+                        </td>
 <?php if (!$this->isPopup): ?>
                         <td align="center" nowrap="nowrap">
                             <?php eval(Hooks::get('CANDIDATE_TEMPLATE_SHOW_PIPELINE_ACTION')); ?>

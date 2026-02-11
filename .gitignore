@@ -13,3 +13,6 @@ uploads/*
 /vendor/
 *.diff
 *.rej
+# Ignore sensitive configuration files
+config.php
+CREDENTIALS.txt

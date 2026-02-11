@@ -875,8 +875,7 @@ class Users
         $sql = sprintf(
                 "SELECT
                 COUNT(user.site_id) AS totalUsers,
-                user.access_level,
-                site.user_licenses AS userLicenses
+                MAX(site.user_licenses) AS userLicenses
                 FROM
                 user
                 LEFT JOIN site

@@ -57,6 +57,7 @@ class SettingsUI extends UserInterface
     /* Maximum number of login history entries to display on User Details. */
     const MAX_RECENT_LOGINS = 15;
 
+    private $_realAccessLevel;
 
     public function __construct()
     {
@@ -135,7 +136,7 @@ class SettingsUI extends UserInterface
             return;
         }
         $tags = new Tags($this->_siteID);
-        $arr = $tags->add((isset($_POST['tag_parent_id'])?$_POST['tag_parent_id']:null),$_POST['tag_title'], "-");
+        $arr = $tags->add($_POST['tag_title'], "-", (isset($_POST['tag_parent_id'])?$_POST['tag_parent_id']:null));
         if (isset($_POST['tag_parent_id']))
         {
 	        printf('
@@ -3244,7 +3245,7 @@ class SettingsUI extends UserInterface
         }
 
         $users = new Users($this->_siteID);
-        if ($users->changePassword($this->_userID, 'cats', $password) != LOGIN_SUCCESS)
+        if (!$users->resetPassword($this->_userID, $password))
         {
             echo 'Cannot change your site password!';
             return;

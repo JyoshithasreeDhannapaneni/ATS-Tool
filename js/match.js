@@ -136,3 +136,110 @@ function setRating(candidateJobOrderID, rating, imageID, sessionCookie)
         false
     );
 }
+
+function updatePipelineStatus(candidateJobOrderID, candidateID, jobOrderID, statusID, sessionCookie)
+{
+    if (candidateJobOrderID == '' || !stringIsNumeric(candidateJobOrderID))
+    {
+        return;
+    }
+
+    if (candidateID == '' || !stringIsNumeric(candidateID))
+    {
+        return;
+    }
+
+    if (jobOrderID == '' || !stringIsNumeric(jobOrderID))
+    {
+        return;
+    }
+
+    if (statusID == '' || !stringIsNumeric(statusID))
+    {
+        return;
+    }
+
+    var selectElement = document.getElementById('statusSelect' + candidateJobOrderID);
+    if (!selectElement)
+    {
+        return;
+    }
+
+    // Store original value in case of error
+    var originalValue = selectElement.getAttribute('data-original-value');
+    if (!originalValue)
+    {
+        originalValue = selectElement.value;
+        selectElement.setAttribute('data-original-value', originalValue);
+    }
+
+    var http = AJAX_getXMLHttpObject();
+
+    /* Build HTTP POST data. */
+    var POSTData = '';
+    POSTData += '&candidateJobOrderID=' + candidateJobOrderID;
+    POSTData += '&candidateID='         + candidateID;
+    POSTData += '&jobOrderID='          + jobOrderID;
+    POSTData += '&statusID='             + statusID;
+
+    /* Anonymous callback function triggered when HTTP response is received. */
+    var callBack = function ()
+    {
+        if (http.readyState != 4)
+        {
+            return;
+        }
+
+        if (!http.responseXML)
+        {
+            var errorMessage = "An error occurred while receiving a response from the server.\n\n"
+                             + http.responseText;
+            alert(errorMessage);
+            // Restore original value on error
+            selectElement.value = originalValue;
+            return;
+        }
+
+        /* Return if we have any errors. */
+        var errorCodeNode    = http.responseXML.getElementsByTagName('errorcode').item(0);
+        var errorMessageNode = http.responseXML.getElementsByTagName('errormessage').item(0);
+        if (!errorCodeNode.firstChild || errorCodeNode.firstChild.nodeValue != '0')
+        {
+            var errorMessage = "An error occurred while updating the status.\n\n"
+                             + (errorMessageNode.firstChild ? errorMessageNode.firstChild.nodeValue : 'Unknown error');
+            alert(errorMessage);
+            // Restore original value on error
+            selectElement.value = originalValue;
+            return;
+        }
+
+        /* Locate the node we need in the XML response data. */
+        var statusNode = http.responseXML.getElementsByTagName('newstatus').item(0);
+        var statusIDNode = http.responseXML.getElementsByTagName('newstatusid').item(0);
+
+        /* Use the data from the XML response to verify the update. */
+        if (!statusNode || !statusNode.firstChild)
+        {
+            alert("An error occurred while receiving a response from the server.");
+            selectElement.value = originalValue;
+            return;
+        }
+
+        // Update the original value to the new one
+        selectElement.setAttribute('data-original-value', statusID);
+        
+        // Status updated successfully - page will refresh or status will be updated via AJAX
+        // The status is already updated in the dropdown, so no need to change it
+    }
+
+    AJAX_callCATSFunction(
+        http,
+        'updatePipelineStatus',
+        POSTData,
+        callBack,
+        0,
+        sessionCookie,
+        false,
+        false
+    );
+}

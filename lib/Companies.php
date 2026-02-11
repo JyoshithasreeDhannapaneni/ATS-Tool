@@ -754,7 +754,7 @@ class CompaniesDataGrid extends DataGrid
         $this->_dataItemIDColumn = 'company.company_id';
 
         $this->_classColumns = array(
-            'Attachments' => array(  'select'   => 'IF(attachment_id, 1, 0) AS attachmentPresent',
+            'Attachments' => array(  'select'   => 'MAX(IF(attachment.attachment_id IS NOT NULL, 1, 0)) AS attachmentPresent',
                                      'pagerRender' => '
                                                     if ($rsData[\'attachmentPresent\'] == 1)
                                                     {
@@ -946,7 +946,7 @@ class CompaniesDataGrid extends DataGrid
 
         $sql = sprintf(
             "SELECT SQL_CALC_FOUND_ROWS %s
-                IF(attachment_id, 1, 0) AS attachmentPresent,
+                MAX(IF(attachment.attachment_id IS NOT NULL, 1, 0)) AS attachmentPresent,
                 company.is_hot AS isHot,
                 company.company_id AS companyID,
                 company.company_id AS exportID,

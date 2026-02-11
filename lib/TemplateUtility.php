@@ -102,10 +102,10 @@ class TemplateUtility
 
         echo '<div id="headerBlock">', "\n";
 
-        /* CATS Logo */
+        /* Neutara ATS Tool Logo */
         echo '<table cellspacing="0" cellpadding="0" style="margin: 0px; padding: 0px; float: left;">', "\n";
         echo '<tr>', "\n";
-        echo '<td rowspan="2"><img src="images/applicationLogo.jpg" border="0" alt="CATS Applicant Tracking System" /></td>', "\n";
+        echo '<td rowspan="2" style="vertical-align: middle; padding-right: 10px;"><img src="images/Neutaralogo.jpg" border="0" alt="Neutara ATS Tool" style="max-height: 45px; max-width: 200px; height: auto; width: auto; display: block;" /></td>', "\n";
         echo '</tr>', "\n";
         echo '</table>', "\n";
 
@@ -827,8 +827,8 @@ class TemplateUtility
        */
 
         echo '<div class="footerBlock">', "\n";
-        echo '<p id="footerText">OpenCATS Version ', CATS_VERSION, $buildString,
-             '. <span id="toolbarVersion"></span>Powered by <a href="http://www.opencats.org/"><strong>OpenCATS</strong></a>.</p>', "\n";
+        echo '<p id="footerText">Neutara ATS Tool Version ', CATS_VERSION, $buildString,
+             '. <span id="toolbarVersion"></span>Powered by <a href="http://www.opencats.org/"><strong>Neutara ATS Tool</strong></a>.</p>', "\n";
         echo '<span id="footerResponse">Server Response Time: ', $loadTime, ' seconds.</span><br />';
         echo '<span id="footerCopyright">', COPYRIGHT_HTML, '</span>', "\n";
         if (!eval(Hooks::get('TEMPLATEUTILITY_SHOWPRIVACYPOLICY'))) return;
@@ -871,8 +871,8 @@ class TemplateUtility
 
         echo '<div class="footerBlock">', "\n";
         echo '<p id="footerText">Report generated on ', $date, '.<br />', "\n";
-        echo 'CATS Version ', CATS_VERSION, $buildString,
-             '. Powered by <a href="http://www.catsone.com/"><strong>CATS</strong></a>.</p>', "\n";
+        echo 'Neutara ATS Tool Version ', CATS_VERSION, $buildString,
+             '. Powered by <a href="http://www.catsone.com/"><strong>Neutara ATS Tool</strong></a>.</p>', "\n";
         echo '<span id="footerCopyright">', COPYRIGHT_HTML, '</span>', "\n";
         echo '</div>', "\n";
 
@@ -1179,7 +1179,7 @@ class TemplateUtility
         echo '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">', "\n";
         echo '<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">', "\n";
         echo '<head>', "\n";
-        echo '<title>OpenCATS - ', $pageTitle, '</title>', "\n";
+        echo '<title>Neutara ATS Tool - ', $pageTitle, '</title>', "\n";
         echo '<meta http-equiv="Content-Type" content="text/html; charset=', HTML_ENCODING, '" />', "\n";
         echo '<link rel="icon" href="images/favicon.ico" type="image/x-icon" />', "\n";
         echo '<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" />', "\n";

@@ -37,6 +37,7 @@ include(LEGACY_ROOT . '/lib/ACL.php');
  *  @package    CATS
  *  @subpackage Library
  */
+#[AllowDynamicProperties]
 class CATSSession
 {
     private $_siteID = -1;
@@ -873,7 +874,7 @@ class CATSSession
 
                 if (strlen($rs['columnPreferences']) > 0 && $this->_isDemo == false)
                 {
-                    $this->_ = unserialize($rs['columnPreferences']);
+                    $this->_dataGridColumnPreferences = unserialize($rs['columnPreferences']);
                 }
                 else
                 {
@@ -1279,6 +1280,42 @@ class CATSSession
     public function setDataGridParameters($instance, $parameters)
     {
         $this->_dataGridColumnPreferences[md5($instance)] = $parameters;
+    }
+
+    /**
+     * Magic method to handle dynamic property assignments.
+     * This prevents deprecation warnings for the old $_ property.
+     *
+     * @param string $name Property name
+     * @param mixed $value Property value
+     * @return void
+     */
+    public function __set($name, $value)
+    {
+        // Handle the old $_ property and map it to _dataGridColumnPreferences
+        if ($name === '_') {
+            $this->_dataGridColumnPreferences = $value;
+            return;
+        }
+        
+        // For PHP 8.2+ compatibility, allow setting other dynamic properties
+        // but log a warning for debugging (optional)
+        $this->$name = $value;
+    }
+
+    /**
+     * Magic method called when object is unserialized.
+     * This cleans up any old $_ property from serialized sessions.
+     *
+     * @return void
+     */
+    public function __wakeup()
+    {
+        // If the old $_ property exists, migrate it to _dataGridColumnPreferences
+        if (isset($this->{'_'})) {
+            $this->_dataGridColumnPreferences = $this->{'_'};
+            unset($this->{'_'});
+        }
     }
 }
 

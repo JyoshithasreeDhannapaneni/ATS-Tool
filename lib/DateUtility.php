@@ -132,20 +132,21 @@ class DateUtility
         switch ($toFormat)
         {
             case DATE_FORMAT_YYYYMMDD:
-                $dateFormat = '%Y' . $separator . '%m' . $separator . '%d';
+                $dateFormat = 'Y' . $separator . 'm' . $separator . 'd';
                 break;
 
             case DATE_FORMAT_DDMMYY:
-                $dateFormat = '%d' . $separator . '%m' . $separator . '%y';
+                $dateFormat = 'd' . $separator . 'm' . $separator . 'y';
                 break;
 
             case DATE_FORMAT_MMDDYY:
-                $dateFormat = '%m' . $separator . '%d' . $separator . '%y';
+                $dateFormat = 'm' . $separator . 'd' . $separator . 'y';
                 break;
         }
 
         /* Return the date in the correct format. */
-        return strftime($dateFormat, mktime(0, 0, 0, $month, $day, $year));
+        // Convert strftime format to date() format and use date() instead of deprecated strftime()
+        return date($dateFormat, mktime(0, 0, 0, $month, $day, $year));
     }
   
 
@@ -265,7 +266,7 @@ class DateUtility
      * @param integer year
      * @return string YYYY-MM-DD
      */
-    public function formatSearchDate($month, $day, $year)
+    public static function formatSearchDate($month, $day, $year)
     {
         return date('Y-m-d', mktime(0, 0, 0, $month, $day, $year));
     }
@@ -469,15 +470,15 @@ class DateUtility
         switch ($format)
         {
             case DATE_FORMAT_YYYYMMDD:
-                return strftime('%Y-%m-%d', $unixTime);
+                return date('Y-m-d', $unixTime);
                 break;
 
             case DATE_FORMAT_MMDDYY:
-                return strftime('%m-%d-%y', $unixTime);
+                return date('m-d-y', $unixTime);
                 break;
 
             case DATE_FORMAT_DDMMYY:
-                return strftime('%d-%m-%y', $unixTime);
+                return date('d-m-y', $unixTime);
                 break;
 
             case DATE_FORMAT_SECONDS:

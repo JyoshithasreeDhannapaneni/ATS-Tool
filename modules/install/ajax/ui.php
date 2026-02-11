@@ -1171,18 +1171,54 @@ function MySQLQuery($query, $ignoreErrors = false)
 
 function MySQLQueryMultiple($SQLData, $delimiter = ';')
 {
-    $SQLStatments = explode($delimiter, $SQLData);
+    global $mySQLConnection;
+    
+    // Use mysqli_multi_query for better handling of complex SQL with MySQL comments
+    // This method properly handles MySQL conditional comments like /*!40101 ... */
+    if (mysqli_multi_query($mySQLConnection, $SQLData)) {
+        do {
+            // Store result to free memory
+            if ($result = mysqli_store_result($mySQLConnection)) {
+                mysqli_free_result($result);
+            }
+            
+            // Check for errors but continue (ignore "table already exists" and duplicate errors)
+            if (mysqli_errno($mySQLConnection)) {
+                $error = mysqli_error($mySQLConnection);
+                $errorNo = mysqli_errno($mySQLConnection);
+                
+                // Ignore common non-critical errors
+                if ($errorNo != 1050 && // Table already exists
+                    strpos($error, 'already exists') === false && 
+                    strpos($error, 'Duplicate') === false &&
+                    strpos($error, 'Unknown database') === false) {
+                    // Only log actual errors, don't stop execution
+                    error_log("MySQL Warning during import: " . $error);
+                }
+            }
+        } while (mysqli_next_result($mySQLConnection));
+    } else {
+        // Fallback to old method if multi_query fails
+        // Remove MySQL conditional comments that cause parsing issues
+        $SQLData = preg_replace('/\/\*!\d+\s*(.*?)\s*\*\/;?/s', '', $SQLData);
+        
+        // Remove regular comments
+        $SQLData = preg_replace('/--.*$/m', '', $SQLData);
+        $SQLData = preg_replace('/\/\*.*?\*\//s', '', $SQLData);
+        
+        $SQLStatments = explode($delimiter, $SQLData);
 
-    foreach ($SQLStatments as $SQL)
-    {
-        $SQL = trim($SQL);
-
-        if (empty($SQL))
+        foreach ($SQLStatments as $SQL)
         {
-            continue;
-        }
+            $SQL = trim($SQL);
 
-        MySQLQuery($SQL);
+            if (empty($SQL) || strlen($SQL) < 10)
+            {
+                continue;
+            }
+
+            MySQLQuery($SQL, true); // Ignore errors for fallback
+        }
     }
 }
 

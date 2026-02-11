@@ -503,11 +503,22 @@ class CareersUI extends UserInterface
                     {
                         $d2t = new DocumentToText();
                         $docType = $d2t->getDocumentType($uploadFilePath);
-                        if ($d2t->convert($uploadFilePath, $docType) !== false)
+                        $conversionResult = $d2t->convert($uploadFilePath, $docType);
+                        
+                        // Try to get text even if conversion reported failure
+                        // Sometimes conversion tools return non-zero exit codes but still extract text
+                        $rawOutput = $d2t->getRawOutput();
+                        $resumeContents = $d2t->getString();
+                        
+                        if ($conversionResult !== false && !empty($resumeContents))
                         {
-                            $resumeContents = $d2t->getString();
                             // Remove nasty things like _rATr in favor of @
                             $resumeContents = DatabaseSearch::fulltextDecode($resumeContents);
+                        }
+                        elseif (!empty($rawOutput) && trim($rawOutput) != '')
+                        {
+                            // Use raw output if available even if conversion reported failure
+                            $resumeContents = DatabaseSearch::fulltextDecode($rawOutput);
                         }
                         else
                         {
@@ -825,9 +836,9 @@ class CareersUI extends UserInterface
             $template['Content'] = str_replace('<created>',      $jobOrderData['dateCreated'], $template['Content']);
             $template['Content'] = str_replace('<recruiter>',    $jobOrderData['recruiterFullName'], $template['Content']);
             $template['Content'] = str_replace('<companyName>',  $jobOrderData['companyName'], $template['Content']);
-            $template['Content'] = str_replace('<contactName>',  $jobOrderData['contactFullName'], $template['Content']);
-            $template['Content'] = str_replace('<contactPhone>', $jobOrderData['contactWorkPhone'], $template['Content']);
-            $template['Content'] = str_replace('<contactEmail>', $jobOrderData['contactEmail'], $template['Content']);
+            $template['Content'] = str_replace('<contactName>',  $jobOrderData['contactFullName'] ?? '', $template['Content']);
+            $template['Content'] = str_replace('<contactPhone>', $jobOrderData['contactWorkPhone'] ?? '', $template['Content']);
+            $template['Content'] = str_replace('<contactEmail>', $jobOrderData['contactEmail'] ?? '', $template['Content']);
             $template['Content'] = str_replace('<description>',  $jobOrderData['description'], $template['Content']);
             $template['Content'] = str_replace('<rate>',         nl2br($jobOrderData['maxRate']), $template['Content']);
             $template['Content'] = str_replace('<salary>',       nl2br($jobOrderData['salary']), $template['Content']);

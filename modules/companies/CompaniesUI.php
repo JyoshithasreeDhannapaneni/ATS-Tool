@@ -372,7 +372,7 @@ class CompaniesUI extends UserInterface
         /* Contacts for this company */
         $contacts   = new Contacts($this->_siteID);
         $contactsRS = $contacts->getAll(-1, $companyID);
-        $contactsRSWC = null;
+        $contactsRSWC = array(); // Initialize as empty array instead of null for PHP 8+ compatibility
 
         if (!empty($contactsRS))
         {
@@ -886,11 +886,8 @@ class CompaniesUI extends UserInterface
             return;
         }
 
-        if ($rs['defaultCompany'] == 1)
-        {
-            $this->listByView('Cannot delete default company.');
-            return;
-        }
+        // Allow deletion of default company (Internal Postings) if needed
+        // Removed restriction: if ($rs['defaultCompany'] == 1) { ... }
 
        if (!eval(Hooks::get('CLIENTS_ON_DELETE_PRE'))) return;
 

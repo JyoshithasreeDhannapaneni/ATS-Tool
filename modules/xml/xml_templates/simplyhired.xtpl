@@ -9,7 +9,7 @@
 <job>
 <title>$[jobTitle]</title>
 <job-code>$[jobID]</job-code>
-<job-board-name>CATS Applicant Tracking System</job-board-name>
+<job-board-name>Neutara ATS Tool</job-board-name>
 
 <job-board-url>http://www.catsone.com</job-board-url>
 <detail-url>$[jobURL]</detail-url>

@@ -362,7 +362,7 @@ class JobOrders
             $this->_siteID
         );
 
-        return $this->_db->getColumn($sql, 0, 0);
+        return $this->_db->getColumn(0, 0, $sql);
     }
 
     /**
@@ -627,7 +627,7 @@ class JobOrders
             "SELECT
                 joborder.joborder_id AS jobOrderID,
                 joborder.client_job_id AS jobID,
-                IF(attachment_id, 1, 0) AS attachmentPresent,
+                MAX(IF(attachment.attachment_id IS NOT NULL, 1, 0)) AS attachmentPresent,
                 joborder.title AS title,
                 joborder.description AS jobDescription,
                 joborder.notes AS notes,
@@ -874,7 +874,7 @@ class JobOrdersDataGrid extends DataGrid
         $this->_dataItemIDColumn = 'joborder.joborder_id';
 
         $this->_classColumns = array(
-            'Attachments' => array(  'select'   => 'IF(attachment_id, 1, 0) AS attachmentPresent',
+            'Attachments' => array(  'select'   => 'MAX(IF(attachment.attachment_id IS NOT NULL, 1, 0)) AS attachmentPresent',
                                      'pagerRender' => '
                                                     if ($rsData[\'attachmentPresent\'] == 1)
                                                     {

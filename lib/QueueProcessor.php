@@ -145,7 +145,7 @@ class QueueProcessor
                 locked = 1",
             $db->makeQueryString($taskName)
         );
-        $cnt = $db->getColumn($sql, 0, 0);
+        $cnt = $db->getColumn(0, 0, $sql);
 
         if ($cnt > 0)
         {
@@ -356,7 +356,7 @@ class QueueProcessor
 
         $rs = $db->query($sql);
 
-        if (($response = $db->getColumn($sql, 0, 0)) !== false)
+        if (($response = $db->getColumn(0, 0, $sql)) !== false)
         {
             return $response;
         }
@@ -384,7 +384,7 @@ class QueueProcessor
                 ISNULL(date_completed)"
         );
 
-        if (($num = $db->getColumn($sql, 0, 0)) !== false)
+        if (($num = $db->getColumn(0, 0, $sql)) !== false)
         {
             return $num;
         }
@@ -408,7 +408,7 @@ class QueueProcessor
                 locked = 1"
         );
 
-        if (($num = $db->getColumn($sql, 0, 0)) !== false)
+        if (($num = $db->getColumn(0, 0, $sql)) !== false)
         {
             return $num;
         }
@@ -432,7 +432,7 @@ class QueueProcessor
                 error = 1"
         );
 
-        if (($num = $db->getColumn($sql, 0, 0)) !== false)
+        if (($num = $db->getColumn(0, 0, $sql)) !== false)
         {
             return $num;
         }

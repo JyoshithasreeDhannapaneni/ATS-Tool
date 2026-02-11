@@ -412,7 +412,7 @@ class Contacts
             $this->_siteID
         );
 
-        return $this->_db->getColumn($sql, 0, 0);
+        return $this->_db->getColumn(0, 0, $sql);
     }
 
     /**

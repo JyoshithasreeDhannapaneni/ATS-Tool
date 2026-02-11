@@ -296,7 +296,7 @@ class ModuleUtility
         $_SESSION['hooks'] = $hooks;
 
         /* Sort the modules. */
-        uksort($modules , array('self', '_sortModules'));
+        uksort($modules , [self::class, '_sortModules']);
 
         /* Verify that core modules are present. */
         self::_checkCoreModules($modules);

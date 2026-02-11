@@ -63,7 +63,42 @@
                             <area href="#" alt="Yearly" title="Yearly"
                                  shape="rect" coords="398,49,461,74" onclick="swapHomeGraph(<?php echo(DASHBOARD_GRAPH_YEARLY); ?>);" />
                         </map>
-                        <img src="<?php echo(CATSUtility::getIndexName()); ?>?m=graphs&amp;a=miniPlacementStatistics&amp;width=495&amp;height=230" id="homeGraph" onclick="" alt="Hiring Overview" usemap="#dashboardmap" border="0" />
+                        <div id="hiringOverviewContainer" style="width: 495px; height: 230px; border: 1px solid #c0c0c0; background: #E7EEFF; position: relative; overflow: hidden;">
+                            <img src="<?php echo(CATSUtility::getIndexName()); ?>?m=graphs&amp;a=miniPlacementStatistics&amp;width=495&amp;height=230&amp;view=<?php echo(DASHBOARD_GRAPH_WEEKLY); ?>&amp;t=<?php echo(time()); ?>" id="homeGraph" onclick="" alt="Hiring Overview" usemap="#dashboardmap" border="0" style="display: block; width: 100%; height: 100%; object-fit: contain;" onerror="handleGraphError(this);" onload="handleGraphLoad(this);" />
+                            <div id="hiringOverviewError" style="display: none; text-align: center; padding-top: 100px; color: #666; font-size: 12px; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #E7EEFF;">
+                                Unable to load hiring overview graph.<br />
+                                <a href="javascript:void(0);" onclick="retryGraph(); return false;" style="color: #0066cc; text-decoration: underline;">Retry</a>
+                            </div>
+                            <div id="hiringOverviewLoading" style="display: none; text-align: center; padding-top: 100px; color: #666; font-size: 12px; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #E7EEFF;">
+                                Loading graph...
+                            </div>
+                        </div>
+                        <script type="text/javascript">
+                        function handleGraphError(img) {
+                            img.style.display = 'none';
+                            document.getElementById('hiringOverviewError').style.display = 'block';
+                            document.getElementById('hiringOverviewLoading').style.display = 'none';
+                        }
+                        function handleGraphLoad(img) {
+                            img.style.display = 'block';
+                            document.getElementById('hiringOverviewError').style.display = 'none';
+                            document.getElementById('hiringOverviewLoading').style.display = 'none';
+                        }
+                        function retryGraph() {
+                            var img = document.getElementById('homeGraph');
+                            var errorDiv = document.getElementById('hiringOverviewError');
+                            var loadingDiv = document.getElementById('hiringOverviewLoading');
+                            
+                            errorDiv.style.display = 'none';
+                            loadingDiv.style.display = 'block';
+                            img.style.display = 'none';
+                            
+                            // Add timestamp to force reload
+                            var src = img.src.split('&t=')[0];
+                            img.src = src + '&t=' + new Date().getTime();
+                            img.style.display = 'block';
+                        }
+                        </script>
                     </td>
                 </tr>
             </table>

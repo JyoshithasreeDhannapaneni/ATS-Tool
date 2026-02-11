@@ -35,9 +35,27 @@ define('GRAPH_TREND_LINES', false);
 /* Is GD2 installed? */
 if (function_exists('ImageCreateFromJpeg'))
 {
+    // Load artichow configuration first (defines ARTICHOW constant)
+    if (is_file(LEGACY_ROOT . '/lib/artichow/Artichow.cfg.php'))
+    {
+        include_once(LEGACY_ROOT . '/lib/artichow/Artichow.cfg.php');
+    }
+    else
+    {
+        // Fallback: define ARTICHOW constant if config file doesn't exist
+        if (!defined('ARTICHOW'))
+        {
+            define('ARTICHOW', LEGACY_ROOT . '/lib/artichow');
+        }
+    }
+    
+    // Load Graph.class.php which will load all required dependencies in correct order
+    include_once(LEGACY_ROOT . '/lib/artichow/Graph.class.php');
+    
+    // Load additional plot classes that Graph.class.php doesn't load
+    include_once(LEGACY_ROOT . '/lib/artichow/Plot.class.php');
     include_once(LEGACY_ROOT . '/lib/artichow/LinePlot.class.php');
     include_once(LEGACY_ROOT . '/lib/artichow/BarPlot.class.php');
-    include_once(LEGACY_ROOT . '/lib/artichow/inc/Label.class.php');
     include_once(LEGACY_ROOT . '/lib/artichow/BarPlotPipeline.class.php');
     include_once(LEGACY_ROOT . '/lib/artichow/BarPlotDashboard.class.php');
     include_once(LEGACY_ROOT . '/lib/artichow/AntiSpam.class.php');
@@ -298,9 +316,26 @@ class pipelineStatisticsGraph
     // FIXME: Document me.
     public function draw($format = false)
     {
+        // Clean output buffers first
+        while (ob_get_level())
+        {
+            ob_end_clean();
+        }
+        
         /* Make sure we have GD support. */
         if (!function_exists('imagecreatefromjpeg'))
         {
+            // Output error image instead of just dying
+            header('Content-Type: image/png');
+            header('Cache-Control: no-cache, must-revalidate');
+            $img = imagecreate($this->width, $this->height);
+            $bgColor = imagecolorallocate($img, 244, 244, 244);
+            $textColor = imagecolorallocate($img, 102, 102, 102);
+            $borderColor = imagecolorallocate($img, 192, 192, 192);
+            imagerectangle($img, 0, 0, $this->width - 1, $this->height - 1, $borderColor);
+            imagestring($img, 2, ($this->width - strlen('GD library required') * 6) / 2, ($this->height - 13) / 2, 'GD library required', $textColor);
+            imagepng($img);
+            imagedestroy($img);
             die();
         }
 
@@ -309,50 +344,83 @@ class pipelineStatisticsGraph
             $format = IMG_PNG;
         }
 
-        $graph = new Graph($this->width, $this->height, NULL, 0, $this->width-95);
+        try
+        {
+            $graph = new Graph($this->width, $this->height, NULL, 0, $this->width-95);
 
-        $graph->setFormat($format);
-        $graph->setBackgroundColor(new Color(0xF4, 0xF4, 0xF4));
-        $graph->shadow->setSize(0);
+            $graph->setFormat($format);
+            $graph->setBackgroundColor(new Color(0xF4, 0xF4, 0xF4));
+            $graph->shadow->setSize(0);
 
-        $graph->border->setColor(new Color(0xD0, 0xD0, 0xD0));
+            $graph->border->setColor(new Color(0xD0, 0xD0, 0xD0));
 
-        $plot = new BarPlotDashboard($this->xValues, 1, 1, 0, $this->totalValue, true, $this->noData);
-        $plot->setPadding(25, 105, 10, 22);
-        $plot->setBarColor(new DarkGreen);
-        $plot->barBorder->hide(true);
+            $plot = new BarPlotDashboard($this->xValues, 1, 1, 0, $this->totalValue, true, $this->noData);
+            $plot->setPadding(25, 105, 10, 22);
+            $plot->setBarColor(new DarkGreen);
+            $plot->barBorder->hide(true);
 
-        $plot->arrayBarBackground = $this->colorArray;
+            $plot->arrayBarBackground = $this->colorArray;
 
-        $plot->label->set($this->xValues);
-        $plot->label->setFormat('%.0f');
-        $plot->label->setBackgroundColor(new Color(240, 240, 240, 15));
-        $plot->label->border->setColor(new Color(187, 187, 187, 15));
-        $plot->label->setPadding(3, 1, 0, 0);
+            $plot->label->set($this->xValues);
+            $plot->label->setFormat('%.0f');
+            $plot->label->setBackgroundColor(new Color(240, 240, 240, 15));
+            $plot->label->border->setColor(new Color(187, 187, 187, 15));
+            $plot->label->setPadding(3, 1, 0, 0);
 
-        $plot->xAxis->setLabelText($this->xLabels);
-        $plot->xAxis->label->setFont(new Tuffy(8));
-        $plot->xAxis->setDashboardImageMode(true);
-        $plot->xAxis->setColor(new Color(0xD0, 0xD0, 0xD0));
-        $plot->yAxis->setColor(new Color(0xD0, 0xD0, 0xD0));
-        $plot->yAxis->setDashboardImageMode(true);
-        $plot->view = $this->view;
+            $plot->xAxis->setLabelText($this->xLabels);
+            $plot->xAxis->label->setFont(new Tuffy(8));
+            $plot->xAxis->setDashboardImageMode(true);
+            $plot->xAxis->setColor(new Color(0xD0, 0xD0, 0xD0));
+            $plot->yAxis->setColor(new Color(0xD0, 0xD0, 0xD0));
+            $plot->yAxis->setDashboardImageMode(true);
+            $plot->view = $this->view;
 
-        $plot->yAxis->label->setFont(new Tuffy(8));
+            $plot->yAxis->label->setFont(new Tuffy(8));
 
-        $plot->legend->add($plot, $this->legend1, Legend::BACKGROUND);
-        $plot->legend->add($plot, $this->legend2, Legend::BACKGROUND);
-        $plot->legend->add($plot, $this->legend3, Legend::BACKGROUND);
-        $plot->legend->setTextFont(new Tuffy(8));
-        $plot->legend->setPosition(1, 0.825);
-        $plot->legend->setPadding(3, 3, 3, 3, 3);
-        $plot->legend->setBackgroundColor(new Color(0xFF, 0xFF, 0xFF));
-        $plot->legend->border->setColor(new Color(0xD0, 0xD0, 0xD0));
-        $plot->legend->shadow->setSize(0);
+            $plot->legend->add($plot, $this->legend1, Legend::BACKGROUND);
+            $plot->legend->add($plot, $this->legend2, Legend::BACKGROUND);
+            $plot->legend->add($plot, $this->legend3, Legend::BACKGROUND);
+            $plot->legend->setTextFont(new Tuffy(8));
+            $plot->legend->setPosition(1, 0.825);
+            $plot->legend->setPadding(3, 3, 3, 3, 3);
+            $plot->legend->setBackgroundColor(new Color(0xFF, 0xFF, 0xFF));
+            $plot->legend->border->setColor(new Color(0xD0, 0xD0, 0xD0));
+            $plot->legend->shadow->setSize(0);
 
-        $graph->add($plot);
+            $graph->add($plot);
 
-        $graph->draw();
+            $graph->draw();
+        }
+        catch (Exception $e)
+        {
+            // Output error image on exception
+            header('Content-Type: image/png');
+            header('Cache-Control: no-cache, must-revalidate');
+            $img = imagecreate($this->width, $this->height);
+            $bgColor = imagecolorallocate($img, 244, 244, 244);
+            $textColor = imagecolorallocate($img, 102, 102, 102);
+            $borderColor = imagecolorallocate($img, 192, 192, 192);
+            imagerectangle($img, 0, 0, $this->width - 1, $this->height - 1, $borderColor);
+            $errorMsg = 'Graph generation error';
+            imagestring($img, 2, ($this->width - strlen($errorMsg) * 6) / 2, ($this->height - 13) / 2, $errorMsg, $textColor);
+            imagepng($img);
+            imagedestroy($img);
+        }
+        catch (Error $e)
+        {
+            // Output error image on fatal error
+            header('Content-Type: image/png');
+            header('Cache-Control: no-cache, must-revalidate');
+            $img = imagecreate($this->width, $this->height);
+            $bgColor = imagecolorallocate($img, 244, 244, 244);
+            $textColor = imagecolorallocate($img, 102, 102, 102);
+            $borderColor = imagecolorallocate($img, 192, 192, 192);
+            imagerectangle($img, 0, 0, $this->width - 1, $this->height - 1, $borderColor);
+            $errorMsg = 'Graph generation error';
+            imagestring($img, 2, ($this->width - strlen($errorMsg) * 6) / 2, ($this->height - 13) / 2, $errorMsg, $textColor);
+            imagepng($img);
+            imagedestroy($img);
+        }
         die();
     }
 }

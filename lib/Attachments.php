@@ -941,7 +941,8 @@ class AttachmentCreator
         /* Recover from magic quotes. Note that tmp_name doesn't appear to
          * get escaped, and stripslashes() on it breaks on Windows. - Will
          */
-        if (get_magic_quotes_gpc())
+        /* Magic quotes were removed in PHP 5.4.0, function removed in PHP 8.0 */
+        if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc())
         {
             $originalFilename = stripslashes($originalFilename);
             $contentType      = stripslashes($contentType);

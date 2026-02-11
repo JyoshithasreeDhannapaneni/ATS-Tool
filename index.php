@@ -90,13 +90,15 @@ function stripslashes_deep($value)
 }
 
 /* Make sure we aren't getting screwed over by magic quotes. */
-if (get_magic_quotes_runtime())
+/* Magic quotes were removed in PHP 5.4.0, function removed in PHP 8.0 */
+if (function_exists('get_magic_quotes_runtime') && get_magic_quotes_runtime())
 {
     if (function_exists('set_magic_quotes_runtime')) {
         set_magic_quotes_runtime(0);
     }
 }
-if (get_magic_quotes_gpc())
+/* Magic quotes were removed in PHP 5.4.0, function removed in PHP 8.0 */
+if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc())
 {
     include_once(LEGACY_ROOT . '/lib/ArrayUtility.php');
 

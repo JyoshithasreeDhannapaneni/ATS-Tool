@@ -780,7 +780,7 @@ class Candidates
             $adminHiddenCriterion
         );
 
-        return $this->_db->getColumn($sql, 0, 0);
+        return $this->_db->getColumn(0, 0, $sql);
     }
 
     /**
@@ -1228,7 +1228,7 @@ class Candidates
                     candidate_duplicates.new_candidate_id) as innerQuery",
             $this->_siteID
         );
-        return $this->_db->getColumn($sql, 0, 0);
+        return $this->_db->getColumn(0, 0, $sql);
     }
 
 
@@ -1936,9 +1936,9 @@ class CandidatesDataGrid extends DataGrid
         $this->_dataItemIDColumn = 'candidate.candidate_id';
 
         $this->_classColumns = array(
-            'Attachments' => array('select' => 'IF(candidate_joborder_submitted.candidate_joborder_id, 1, 0) AS submitted,
-                                                IF(attachment_id, 1, 0) AS attachmentPresent,
-                                                IF(old_candidate_id, 1, 0) AS duplicatePresent',
+            'Attachments' => array('select' => 'MAX(IF(candidate_joborder_submitted.candidate_joborder_id IS NOT NULL, 1, 0)) AS submitted,
+                                                MAX(IF(attachment.attachment_id IS NOT NULL, 1, 0)) AS attachmentPresent,
+                                                MAX(IF(candidate_duplicates.old_candidate_id IS NOT NULL, 1, 0)) AS duplicatePresent',
 
                                      'pagerRender' => 'if ($rsData[\'duplicatePresent\'] == 1 && $_SESSION[\'CATS\']->getAccessLevel(\'candidates.duplicates\') >= ACCESS_LEVEL_SA)
                                                     {

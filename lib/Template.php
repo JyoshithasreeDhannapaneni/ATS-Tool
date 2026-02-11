@@ -35,6 +35,7 @@
  *	@package    CATS
  *	@subpackage Library
  */
+#[\AllowDynamicProperties]
 class Template
 {
     private $_templateFile;
@@ -50,6 +51,10 @@ class Template
      */
     public function _($string)
     {
+        // Handle null values for PHP 8.1+ compatibility
+        if ($string === null) {
+            $string = '';
+        }
         echo(htmlspecialchars($string));
     }
 

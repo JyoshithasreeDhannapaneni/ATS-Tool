@@ -45,8 +45,8 @@
             }
             </script>
 
-            <p id="footerText" align="center">CATS Version <?php echo(CATSUtility::getVersion()); ?> build <?php echo(CATSUtility::getBuild()); ?>. Powered by <a href="http://www.opencats.org" target="_blank"><strong>OpenCATS</strong></a>.<br />
-            <span id="footerCopyright">&copy;2007-2023 OpenCATS All rights reserved.</span></p>
+            <p id="footerText" align="center">Neutara ATS Tool Version <?php echo(CATSUtility::getVersion()); ?> build <?php echo(CATSUtility::getBuild()); ?>. Powered by <a href="http://www.opencats.org" target="_blank"><strong>Neutara ATS Tool</strong></a>.<br />
+            <span id="footerCopyright">&copy;2007-2023 Neutara ATS Tool All rights reserved.</span></p>
         </div>
     </body>
 </html>

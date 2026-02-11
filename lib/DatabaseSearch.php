@@ -357,9 +357,61 @@ class DatabaseSearch
         $string = urldecode($string);
 
         /* Word searches. */
-        $string = preg_replace(
-            "/word\[\(\'([^\)]+)\'\)\]full/",
-            '(' . $tableField . ' REGEXP \'[[:<:]]\\1[[:>:]]\')',
+        $string = preg_replace_callback(
+            "/word\[\(\'((?:[^\'\\\\]|\\\\.)*)\'\)\]full/",
+            function($matches) use ($tableField) {
+                // Escape special regex characters to prevent "Illegal argument to a regular expression" errors
+                $word = $matches[1];
+                
+                // The word has been through makeREGEXPString (line 290) and escapeString (line 293)
+                // It may already have some escaping. We need to ensure all regex metacharacters are properly escaped
+                // for MySQL REGEXP, while preserving SQL escape sequences (\' and \\)
+                
+                // Build escaped word character by character
+                $escapedWord = '';
+                $i = 0;
+                $len = strlen($word);
+                $regexMetachars = '.][()*+?^$|\\'; // Characters that need escaping in MySQL REGEXP
+                
+                while ($i < $len) {
+                    $char = $word[$i];
+                    
+                    // Check if this is a backslash - could be SQL escape or regex escape
+                    if ($char === '\\' && $i + 1 < $len) {
+                        $next = $word[$i + 1];
+                        // Preserve SQL escape sequences (\' and \\)
+                        if ($next === "'" || $next === '\\') {
+                            $escapedWord .= $char . $next;
+                            $i += 2;
+                            continue;
+                        }
+                        // If next char is a regex metacharacter, this is already escaped
+                        // But we need to ensure it's properly escaped for MySQL REGEXP in SQL string
+                        if (strpos($regexMetachars, $next) !== false) {
+                            // Already escaped, but need double backslash for SQL string context
+                            $escapedWord .= '\\\\' . $next;
+                            $i += 2;
+                            continue;
+                        }
+                        // Standalone backslash - escape it
+                        $escapedWord .= '\\\\';
+                        $i++;
+                        continue;
+                    }
+                    
+                    // Check if this is an unescaped regex metacharacter
+                    if (strpos($regexMetachars, $char) !== false) {
+                        // Need to escape it - double backslash for SQL string
+                        $escapedWord .= '\\\\' . $char;
+                    } else {
+                        $escapedWord .= $char;
+                    }
+                    $i++;
+                }
+                
+                // Word is already SQL-escaped, return REGEXP pattern
+                return '(' . $tableField . ' REGEXP \'[[:<:]]' . $escapedWord . '[[:>:]]\')';
+            },
             $string
         );
 

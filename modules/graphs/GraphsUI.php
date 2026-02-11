@@ -404,61 +404,184 @@ class GraphsUI extends UserInterface
     //TODO: Document me.
     private function miniPlacementStatistics()
     {
-        if (isset($_GET['view']))
+        // Clean any output buffers first - CRITICAL for image output
+        while (ob_get_level())
         {
-            $view = (int)$_GET['view'];
-        }
-        else
-        {
-            $view = DASHBOARD_GRAPH_WEEKLY;
+            ob_end_clean();
         }
         
-        $dashboard = new Dashboard($this->_siteID);
-        $pipelineRS = $dashboard->getPipelineData($view);
-        
-        $noData = true;
-        
-        $y = array();
-        $x = array();
-        foreach ($pipelineRS as $index => $data)
+        // Check if GD library is available (case-insensitive check)
+        if (!function_exists('imagecreate') || !function_exists('ImageCreateFromJpeg'))
         {
-            /* Positioning hack */
-            $y[] = str_repeat(" ", 13) . $data['label'];
-            $y[] = "";
-            $y[] = "";
-            $y[] = "";
-            
-            $x[] = $data['submitted'];
-            $x[] = $data['interviewing'];
-            $x[] = $data['placed'];
-            $x[] = 0;
-            
-            if ($data['submitted'] != 0 || $data['interviewing'] != 0 || $data['placed'] != 0)
+            $this->outputErrorImage('GD library not available');
+            return;
+        }
+        
+        // Ensure GraphGenerator classes are loaded
+        if (!class_exists('pipelineStatisticsGraph'))
+        {
+            $this->outputErrorImage('Graph library not loaded');
+            return;
+        }
+        
+        try
+        {
+            if (isset($_GET['view']))
             {
-                $noData = false;
+                $view = (int)$_GET['view'];
             }
+            else
+            {
+                $view = DASHBOARD_GRAPH_WEEKLY;
+            }
+            
+            // Ensure siteID is set (should be set by parent constructor if logged in)
+            if (empty($this->_siteID) || $this->_siteID == -1)
+            {
+                // Try to get siteID from session if available
+                if (isset($_SESSION['CATS']) && is_object($_SESSION['CATS']) && method_exists($_SESSION['CATS'], 'getSiteID'))
+                {
+                    $this->_siteID = $_SESSION['CATS']->getSiteID();
+                }
+            }
+            
+            // If still not set, use default site
+            if (empty($this->_siteID) || $this->_siteID == -1)
+            {
+                $this->_siteID = -1; // Default site
+            }
+            
+            $dashboard = new Dashboard($this->_siteID);
+            $pipelineRS = $dashboard->getPipelineData($view);
+            
+            if (empty($pipelineRS) || !is_array($pipelineRS))
+            {
+                // Don't show error if it's just empty data - show empty graph instead
+                // $this->outputErrorImage('No pipeline data available');
+                // return;
+            }
+            
+            $noData = true;
+            
+            $y = array();
+            $x = array();
+            foreach ($pipelineRS as $index => $data)
+            {
+                /* Positioning hack */
+                $y[] = str_repeat(" ", 13) . $data['label'];
+                $y[] = "";
+                $y[] = "";
+                $y[] = "";
+                
+                $x[] = $data['submitted'];
+                $x[] = $data['interviewing'];
+                $x[] = $data['placed'];
+                $x[] = 0;
+                
+                if ($data['submitted'] != 0 || $data['interviewing'] != 0 || $data['placed'] != 0)
+                {
+                    $noData = false;
+                }
+            }
+            
+            /* Last column is useless... */
+            if (isset($x[15]))
+            {
+                unset ($x[15]);
+            }
+
+            $colorOptions = Graphs::getColorOptions();
+            $colorArray = array();
+
+            for ($i = 0; $i < 15; $i+=4)
+            {
+                $colorArray[] = new LinearGradient(new Color(90, 90, 235), new White, 0);
+                $colorArray[] = new LinearGradient(new Orange, new White, 0);
+                $colorArray[] = new LinearGradient(new MidGreen, new White, 0);
+                $colorArray[] = new LinearGradient(new DarkGreen, new White, 0);
+            }
+            
+            // Check if required classes exist (check both prefixed and non-prefixed versions)
+            if (!class_exists('Graph') && !class_exists('awGraph'))
+            {
+                $this->outputErrorImage('Graph class not loaded');
+                return;
+            }
+            
+            if (!class_exists('BarPlotDashboard') && !class_exists('awBarPlotDashboard'))
+            {
+                $this->outputErrorImage('BarPlotDashboard class not loaded');
+                return;
+            }
+            
+            $graph = new pipelineStatisticsGraph(
+                $y, $x, $colorArray, $this->width, $this->height, "Submissions", "Interviews", "Hires", $view, $noData
+            );
+            
+            // Ensure output is clean before drawing
+            while (ob_get_level())
+            {
+                ob_end_clean();
+            }
+            
+            // Set proper headers before drawing
+            header('Content-Type: image/png');
+            header('Cache-Control: no-cache, must-revalidate');
+            header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+            
+            $graph->draw();
         }
-        
-        /* Last column is useless... */
-        unset ($x[15]);
-
-        $colorOptions = Graphs::getColorOptions();
-        $colorArray = array();
-
-        for ($i = 0; $i < 15; $i+=4)
+        catch (Exception $e)
         {
-            $colorArray[] = new LinearGradient(new Color(90, 90, 235), new White, 0);
-            $colorArray[] = new LinearGradient(new Orange, new White, 0);
-            $colorArray[] = new LinearGradient(new MidGreen, new White, 0);
-            $colorArray[] = new LinearGradient(new DarkGreen, new White, 0);
+            $this->outputErrorImage('Graph generation failed');
+        }
+        catch (Error $e)
+        {
+            $this->outputErrorImage('Graph generation error');
+        }
+        catch (Throwable $e)
+        {
+            $this->outputErrorImage('Graph generation error');
+        }
+        die();
+    }
+    
+    private function outputErrorImage($message = '')
+    {
+        // Clean any output buffers
+        while (ob_get_level())
+        {
+            ob_end_clean();
         }
         
-        $graph = new pipelineStatisticsGraph(
-            $y, $x, $colorArray, $this->width, $this->height, "Submissions", "Interviews", "Hires", $view, $noData
-        );
+        header('Content-Type: image/png');
+        $width = $this->width ? $this->width : 495;
+        $height = $this->height ? $this->height : 230;
         
-        $graph->draw();
-        die();
+        $img = imagecreate($width, $height);
+        $bgColor = imagecolorallocate($img, 244, 244, 244);
+        $textColor = imagecolorallocate($img, 102, 102, 102);
+        $borderColor = imagecolorallocate($img, 192, 192, 192);
+        
+        // Draw border
+        imagerectangle($img, 0, 0, $width - 1, $height - 1, $borderColor);
+        
+        // Draw error message if provided (truncate if too long)
+        if (!empty($message) && function_exists('imagestring'))
+        {
+            $font = 2; // Built-in font
+            $maxLen = floor(($width - 20) / imagefontwidth($font));
+            if (strlen($message) > $maxLen)
+            {
+                $message = substr($message, 0, $maxLen - 3) . '...';
+            }
+            $textX = ($width - strlen($message) * imagefontwidth($font)) / 2;
+            $textY = ($height - imagefontheight($font)) / 2;
+            imagestring($img, $font, $textX, $textY, $message, $textColor);
+        }
+        
+        imagepng($img);
+        imagedestroy($img);
     }
     
 

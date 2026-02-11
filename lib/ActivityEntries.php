@@ -160,7 +160,7 @@ class ActivityEntries
      * @return boolean True if successful; false otherwise.
      */
     public function update($activityID, $activityType, $activityNotes,
-        $jobOrderID = false, $date = false, $timezoneOffset)
+        $jobOrderID = false, $date = false, $timezoneOffset = 0)
     {
         /* Get some extra information about the activity entry that we'll
          * need later on.
@@ -383,7 +383,7 @@ class ActivityEntries
             $this->_siteID
         );
 
-        return $this->_db->getColumn($sql, 0, 0);
+        return $this->_db->getColumn(0, 0, $sql);
     }
 
     /**

@@ -208,8 +208,7 @@ class Mailer
 
             if ($signature)
             {
-                $body .= '\n<br />\n<br /><span style=\"font-size: 10pt;\">Powered by <a href=\"http://www.opencats.org" alt=\"OpenCATS "
-                    . "Applicant Tracking System\">OpenCATS</a> (Free ATS)</span>';
+                $body .= '\n<br />\n<br /><span style=\"font-size: 10pt;\">Powered by <a href=\"http://www.opencats.org" alt=\"Neutara ATS Tool\">Neutara ATS Tool</a> (Free ATS)</span>';
             }
 
             $this->_mailer->Body = '<div style="font: normal normal 12px Arial, Tahoma, sans-serif">'
@@ -221,7 +220,7 @@ class Mailer
         {
             if ($signature)
             {
-                $body .= "\n\nPowered by OpenCATS (http://www.opencats.org) Free ATS";
+                $body .= "\n\nPowered by Neutara ATS Tool (http://www.opencats.org) Free ATS";
             }
 
             $this->_mailer->isHTML(false);
@@ -238,18 +237,30 @@ class Mailer
                 $this->_mailer->AddReplyTo($replyTo[0], $replyTo[1]);
             }
             $this->_mailer->CharSet = 'UTF-8';
-            if (!$this->_mailer->Send())
+            try
             {
+                if (!$this->_mailer->Send())
+                {
+                    $failedRecipients[] = array(
+                        'recipient'    => $recipients[$key],
+                        'errorMessage' => $this->_mailer->ErrorInfo
+                    );
+                }
+                else if ($logMessage)
+                {
+                    // FIXME: Log all recipients in one log entry?
+                    // FIXME: Make sure all callers are passing an array of e-mails and not just a CSV string...
+                    $this->logMessage($from[0], $recipients[$key][0], $subject, $body);
+                }
+            }
+            catch (\PHPMailer\PHPMailer\Exception $e)
+            {
+                // Handle PHPMailer exceptions gracefully (e.g., SMTP connection failures)
+                // Log the error but don't crash the application
                 $failedRecipients[] = array(
                     'recipient'    => $recipients[$key],
-                    'errorMessage' => $this->_mailer->ErrorInfo
+                    'errorMessage' => 'Email sending failed: ' . $e->getMessage()
                 );
-            }
-            else if ($logMessage)
-            {
-                // FIXME: Log all recipients in one log entry?
-                // FIXME: Make sure all callers are passing an array of e-mails and not just a CSV string...
-                $this->logMessage($from[0], $recipients[$key][0], $subject, $body);
             }
 
             $this->_mailer->ClearAddresses();
