@@ -25,7 +25,10 @@ COPY . /var/www/html/
 RUN composer install --no-dev --optimize-autoloader
 
 # Create config.php from example if it doesn't exist
-RUN if [ ! -f config.php ]; then cp config.php.example config.php; fi
+RUN if [ ! -f config.php ] && [ -f config.php.example ]; then \
+        cp config.php.example config.php && \
+        chmod 644 config.php; \
+    fi
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
