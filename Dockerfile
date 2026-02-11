@@ -43,8 +43,13 @@ RUN a2enmod rewrite
 RUN sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf \
     && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:8080>/' /etc/apache2/sites-available/000-default.conf
 
+# Copy and set permissions for entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose port
 EXPOSE 8080
 
-# Start Apache
+# Use entrypoint script to ensure config.php exists at runtime
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
